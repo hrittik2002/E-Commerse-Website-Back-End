@@ -24,6 +24,7 @@ router.post("/register" , async (req , res)=>{
         // in case any error then send 500 status and err as response
         console.log(err)
         res.status(500).json(err);
+        return;
     }
 })
 
@@ -35,7 +36,10 @@ router.post("/login" , async (req , res)=>{
             username : req.body.username
         });
         // if no such user exists on our database 
-        !user && res.status(401).json("Wrong User Name");
+        if(!user){
+             res.status(401).json("Wrong User Name");
+             return;
+        }
 
         // get the original passward from the database by dycrypting 
         const hashedPassword = CryptoJS.AES.decrypt(user.password , process.env.PASS_SEC);
@@ -43,8 +47,11 @@ router.post("/login" , async (req , res)=>{
         const inputPassword = req.body.password; // the password from request body
 
         // if wrond password
-        originalPassword != inputPassword && res.status(401).json("Wrong Password");
-        
+        if(originalPassword != inputPassword)
+        { 
+            res.status(401).json("Wrong Password");
+            return;
+        }
         const accessToken = jwt.sign(
         {
             id : user._id,
@@ -63,6 +70,7 @@ router.post("/login" , async (req , res)=>{
     catch(err){
         // in case any error then send 500 status and err as response
         res.status(500).json(err)
+        return;
     }
 })
 
